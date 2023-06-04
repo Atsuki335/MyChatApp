@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'chat_page.dart';
 
 class AddPostPage extends StatelessWidget {
   @override

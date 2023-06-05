@@ -6,17 +6,19 @@ import 'package:flutter/material.dart';
 import 'package:mychatapp/login_page.dart';
 import 'main.dart';
 import 'post_page.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'provider_page.dart';
 //body部分
 
-class ChatPage extends StatelessWidget {
-  ChatPage(); //引数からユーザー情報を受け取れるようにする
-
+// ConsumerWidgetでProviderから値を受け渡す
+class ChatPage extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    //ユーザー情報を受け取る
-    final UserState userState = Provider.of<UserState>(context);
-    final User user = userState.user!;
+  Widget build(BuildContext context, WidgetRef ref) {
+    //Providerから値を受け取る
+    final User user = ref.watch(userProvider)!;
+    final AsyncValue<QuerySnapshot> asyncPostsQuery =
+        ref.watch(postsQueryProvider);
+
     return Scaffold(
         appBar: AppBar(
           title: Text('チャット'),
@@ -44,46 +46,41 @@ class ChatPage extends StatelessWidget {
             Expanded(
                 // FutureBuilder→stream
                 // 非同期処理の結果を元にWidgetを作れる
-                child: StreamBuilder<QuerySnapshot>(
-              // 投稿メッセージ一覧を取得（非同期処理）
-              // 投稿日時でソート
-              stream: FirebaseFirestore.instance
-                  .collection('posts')
-                  .orderBy('date')
-                  .snapshots(),
-              builder: (context, snapshot) {
-                // データが取得できた場合
-                if (snapshot.hasData) {
-                  final List<DocumentSnapshot> documents = snapshot.data!.docs;
-                  // 取得した投稿メッセージ一覧を元にリスト表示
-                  return ListView(
-                    children: documents.map((document) {
-                      return Card(
-                          child: ListTile(
-                        title: Text(document['text']),
-                        subtitle: Text(document['email']),
-                        //自分の投稿メッセージの場合は削除ボタンを表示
-                        trailing: document['email'] == user.email
-                            ? IconButton(
-                                icon: Icon(Icons.delete),
-                                onPressed: () async {
-                                  //投稿メッセージのドキュメントを削除
-                                  await FirebaseFirestore.instance
-                                      .collection('posts')
-                                      .doc(document.id)
-                                      .delete();
-                                },
-                              )
-                            : null,
-                      ));
-                    }).toList(),
-                  );
-                }
-                return Center(
-                  child: Text('読込中...'),
-                );
-              },
-            ))
+                child: asyncPostsQuery.when(
+                    // 投稿メッセージ一覧を取得（非同期処理）
+                    // 投稿日時でソート
+                    data: (QuerySnapshot query) {
+              return ListView(
+                children: query.docs.map((document) {
+                  return Card(
+                      child: ListTile(
+                    title: Text(document['text']),
+                    subtitle: Text(document['email']),
+                    //自分の投稿メッセージの場合は削除ボタンを表示
+                    trailing: document['email'] == user.email
+                        ? IconButton(
+                            icon: Icon(Icons.delete),
+                            onPressed: () async {
+                              //投稿メッセージのドキュメントを削除
+                              await FirebaseFirestore.instance
+                                  .collection('posts')
+                                  .doc(document.id)
+                                  .delete();
+                            },
+                          )
+                        : null,
+                  ));
+                }).toList(),
+              );
+            }, loading: () {
+              return Center(
+                child: Text('読込中...'),
+              );
+            }, error: (e, stackTrace) {
+              return Center(
+                child: Text(e.toString()),
+              );
+            }))
           ],
         ),
 

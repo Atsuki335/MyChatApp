@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPage> {
                         final UserCredential result =
                             await auth.createUserWithEmailAndPassword(
                                 email: email, password: password);
-                        //ユーザー登録に成功下場合チャット画面に遷移＋ログイン画面を破棄
+                        //ユーザー登録に成功した場合チャット画面に遷移＋ログイン画面を破棄
                         await Navigator.of(context)
                             .pushReplacement(MaterialPageRoute(
                           builder: (context) {
@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                   try {
                     final FirebaseAuth auth = FirebaseAuth.instance;
                     //signInに変更
-                    final UserCredential result = //追加
+                    final UserCredential result = //追加（resultにエラーが出た））
                         await auth.signInWithEmailAndPassword(
                             email: email, password: password);
                     await Navigator.of(context)

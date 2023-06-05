@@ -4,14 +4,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'package:mychatapp/login_page.dart';
+import 'main.dart';
 import 'post_page.dart';
+import 'package:provider/provider.dart';
 //body部分
 
 class ChatPage extends StatelessWidget {
-  ChatPage(this.user); //引数からユーザー情報を受け取れるようにする
-  final User user; //ユーザー情報
+  ChatPage(); //引数からユーザー情報を受け取れるようにする
+
   @override
   Widget build(BuildContext context) {
+    //ユーザー情報を受け取る
+    final UserState userState = Provider.of<UserState>(context);
+    final User user = userState.user!;
     return Scaffold(
         appBar: AppBar(
           title: Text('チャット'),
@@ -37,7 +42,7 @@ class ChatPage extends StatelessWidget {
               child: Text('ログイン情報: ${user.email}'),
             ),
             Expanded(
-                // FutureBuilder
+                // FutureBuilder→stream
                 // 非同期処理の結果を元にWidgetを作れる
                 child: StreamBuilder<QuerySnapshot>(
               // 投稿メッセージ一覧を取得（非同期処理）
@@ -88,7 +93,7 @@ class ChatPage extends StatelessWidget {
             onPressed: () async {
               await Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) {
-                return AddPostPage(user);
+                return AddPostPage();
               }));
             }));
   }

@@ -1,8 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:mychatapp/main.dart';
 import 'firebase_options.dart';
 import 'package:flutter/material.dart';
 import 'chat_page.dart';
+import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -16,6 +18,7 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final UserState userState = Provider.of<UserState>(context);
     return Scaffold(
         body: Center(
       child: Container(
@@ -57,14 +60,15 @@ class _LoginPageState extends State<LoginPage> {
                             await auth.createUserWithEmailAndPassword(
                                 email: email, password: password);
                         //ユーザー登録に成功した場合チャット画面に遷移＋ログイン画面を破棄
+                        userState.setUser(result.user!);
                         await Navigator.of(context)
                             .pushReplacement(MaterialPageRoute(
                           builder: (context) {
+                            return ChatPage();
                             /*pushReplacement:一方通行の画面遷移のとき（ログイン）
                   現在のルートがスタックから完全に削除され新しいルートがスタックにプッシュされる
                   新しいルートが現在のアクティブなルートになり戻るボタンを使用して
                   前のルートに戻ることができなくなる*/
-                            return ChatPage(result.user!);
                           },
                         ));
                       } catch (e) {
@@ -86,10 +90,11 @@ class _LoginPageState extends State<LoginPage> {
                     final UserCredential result = //追加（resultにエラーが出た））
                         await auth.signInWithEmailAndPassword(
                             email: email, password: password);
+                    userState.setUser(result.user!);
                     await Navigator.of(context)
                         .pushReplacement(MaterialPageRoute(
                       builder: (context) {
-                        return ChatPage(result.user!);
+                        return ChatPage();
                       },
                     ));
                   } catch (e) {

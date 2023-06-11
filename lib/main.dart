@@ -12,8 +12,23 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
+develop5
   runApp(ProviderScope(child: ChatApp()) //Riverpodでデータを受渡できる状態にする
       );
+
+  void setUser(User newUser) {
+    user = newUser;
+    notifyListeners();
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(ChatApp());
+ main
 }
 
 class ChatApp extends StatelessWidget {
